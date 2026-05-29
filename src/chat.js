@@ -6,8 +6,7 @@ exports.GenerateResponse=async(req,res)=>{
     const message=info.Message 
 
     const genAI=new GoogleGenerativeAI(Apikey)
-    const model=genAI.GoogleGenerativeAI(
-        {
+    const model=genAI.GoogleGenerativeAI({
             model:"gemini-2.0-flash",
         }
     )

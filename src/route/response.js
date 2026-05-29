@@ -1,7 +1,9 @@
 const express = require("express")
-const {GenerateResponse}=require("../chat")
+const {GenerateResponse }= require("../chat")
 
 
-const router=Express.Router()
+const router=express.Router()
 
 router.post("/Response",GenerateResponse)
+
+module.exports=router 
