@@ -1,22 +1,34 @@
-const {RetriveMessage}=require("./Retrive")
-const { GoogleGenerativeAI }=require("@google/generative-ai");
-exports.GenerateResponse=async(req,res)=>{
-    const info =await RetriveMessage();
-    const Apikey =info.apikkey 
-    const message=info.Message 
+const { RetriveMessage } = require("./Retrive")
+exports.GenerateResponse = async (req, res) => {
+    try {
+        const { Userapikey, message } = req.body;
+        const info = await RetriveMessage(Userapikey, message);
+        const Apikey = info.apikey;
+        const msgToGenerate = info.Message;
 
-    const genAI=new GoogleGenerativeAI(Apikey)
-    const model=genAI.GoogleGenerativeAI({
-            model:"gemini-2.0-flash",
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${Apikey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "google/gemini-2.5-flash",
+                messages: [{ role: "user", content: msgToGenerate }],
+                max_tokens: 2000
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error?.message || "Failed to generate response");
         }
-    )
-    const answer=await model.generateContent(message)
-    const Response=answer.response.text()
-    res.json({Response})
 
-
-    
-
-
-
+        const Response = data.choices[0].message.content;
+        res.json({ Response })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
 }
